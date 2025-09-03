@@ -124,13 +124,21 @@ AWS_STORAGE_BUCKET_NAME = os.getenv("DO_SPACES_BUCKET")
 AWS_S3_REGION_NAME = os.getenv("DO_SPACES_REGION")
 AWS_S3_ENDPOINT_URL = os.getenv("DO_SPACES_ENDPOINT")
 
+# Archivos públicos por defecto
+AWS_DEFAULT_ACL = 'public-read'
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_FILE_OVERWRITE = False
+
+# Dominio personalizado para URLs públicas
 AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_REGION_NAME}.digitaloceanspaces.com"
 
+# Usar almacenamiento S3 si las credenciales están configuradas
 if all([AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME, AWS_S3_REGION_NAME]):
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+else:
+    MEDIA_URL = "/media/"
+
 
 # --- HTTPS detrás de proxy (Railway) ---
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
