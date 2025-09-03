@@ -22,13 +22,13 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "whitenoise.runserver_nostatic",  # WhiteNoise antes de staticfiles
+    "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     # Apps propias
     "portfolio_projects",
     "auth_users",
     "core",
-    # Soporte para Spaces
+    # Storage S3 compatible
     "storages",
 ]
 
@@ -66,7 +66,6 @@ TEMPLATES = [
 
 # --- Base de datos ---
 if DEBUG:
-    # SQLite para desarrollo local
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -74,7 +73,6 @@ if DEBUG:
         }
     }
 else:
-    # PostgreSQL en producción (Railway)
     DATABASE_URL = os.getenv("DATABASE_URL")
     if DATABASE_URL:
         DATABASES = {
@@ -85,7 +83,6 @@ else:
             )
         }
     else:
-        # fallback a SQLite si no hay URL
         DATABASES = {
             "default": {
                 "ENGINE": "django.db.backends.sqlite3",
@@ -93,7 +90,7 @@ else:
             }
         }
 
-# --- Validadores de contraseña ---
+# --- Password validators ---
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -113,7 +110,7 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# --- Archivos multimedia ---
+# --- Media por defecto (si no hay Spaces) ---
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
@@ -122,23 +119,19 @@ AWS_ACCESS_KEY_ID = os.getenv("DO_SPACES_KEY")
 AWS_SECRET_ACCESS_KEY = os.getenv("DO_SPACES_SECRET")
 AWS_STORAGE_BUCKET_NAME = os.getenv("DO_SPACES_BUCKET")
 AWS_S3_REGION_NAME = os.getenv("DO_SPACES_REGION")
-AWS_S3_ENDPOINT_URL = os.getenv("DO_SPACES_ENDPOINT")
+AWS_S3_ENDPOINT_URL = os.getenv("DO_SPACES_ENDPOINT", "https://sfo3.digitaloceanspaces.com")
+AWS_S3_CUSTOM_DOMAIN = os.getenv(
+    "DO_SPACES_CDN",
+    f"{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_REGION_NAME}.digitaloceanspaces.com",
+)
 
-# Archivos públicos por defecto
-AWS_DEFAULT_ACL = 'public-read'
+AWS_DEFAULT_ACL = "public-read"
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_FILE_OVERWRITE = False
 
-# Dominio personalizado para URLs públicas
-AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_REGION_NAME}.digitaloceanspaces.com"
-
-# Usar almacenamiento S3 si las credenciales están configuradas
 if all([AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME, AWS_S3_REGION_NAME]):
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
-else:
-    MEDIA_URL = "/media/"
-
 
 # --- HTTPS detrás de proxy (Railway) ---
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

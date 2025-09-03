@@ -134,11 +134,15 @@ def certification_create(request):
     if request.method == 'POST':
         form = CertificationForm(request.POST, request.FILES)
         if form.is_valid():
-            certification = form.save(commit=False)
-            certification.user = request.user
-            certification.save()
-            messages.success(request, 'Certificación agregada exitosamente.')
-            return redirect('about')
+            try:
+                certification = form.save(commit=False)
+                certification.user = request.user
+                certification.save()
+                messages.success(request, 'Certificación agregada exitosamente.')
+                return redirect('about')
+            except Exception as e:
+                messages.error(request, f'Error al guardar la certificación: {str(e)}')
+                return render(request, 'core/certification_form.html', {'form': form, 'certification': None})
     else:
         form = CertificationForm()
     
@@ -155,9 +159,13 @@ def certification_update(request, pk):
     if request.method == 'POST':
         form = CertificationForm(request.POST, request.FILES, instance=certification)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Certificación actualizada exitosamente.')
-            return redirect('about')
+            try:
+                form.save()
+                messages.success(request, 'Certificación actualizada exitosamente.')
+                return redirect('about')
+            except Exception as e:
+                messages.error(request, f'Error al actualizar la certificación: {str(e)}')
+                return render(request, 'core/certification_form.html', {'form': form, 'certification': certification})
     else:
         form = CertificationForm(instance=certification)
     
