@@ -5,11 +5,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# --- Rutas base ---
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- Seguridad / entorno ---
 SECRET_KEY = 'django-insecure-*q(juvh&o%giq7*4rns!+hCopy-Item)n_i-^3yg-5ej7_&1s2rlz4m'
-DEBUG=False
+DEBUG = False
+
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",") if not DEBUG else ["*"]
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 
@@ -20,14 +22,13 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    # WhiteNoise: debe ir ANTES de staticfiles
-    "whitenoise.runserver_nostatic",
+    "whitenoise.runserver_nostatic",  # WhiteNoise antes de staticfiles
     "django.contrib.staticfiles",
-    # Tus apps
+    # Apps propias
     "portfolio_projects",
     "auth_users",
     "core",
-    # Media en Spaces
+    # Soporte para Spaces
     "storages",
 ]
 
@@ -46,11 +47,11 @@ MIDDLEWARE = [
 ROOT_URLCONF = "portfolio_project.urls"
 WSGI_APPLICATION = "portfolio_project.wsgi.application"
 
-# --- Templates (requerido por admin) ---
+# --- Templates ---
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],  # opcional; tus plantillas
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -63,9 +64,9 @@ TEMPLATES = [
     },
 ]
 
-# --- Base de datos (Postgres en Railway / SQLite local) ---
-# Para desarrollo local, forzar SQLite
+# --- Base de datos ---
 if DEBUG:
+    # SQLite para desarrollo local
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -73,17 +74,18 @@ if DEBUG:
         }
     }
 else:
-    # Solo usar dj_database_url en producción
+    # PostgreSQL en producción (Railway)
     DATABASE_URL = os.getenv("DATABASE_URL")
-    if DATABASE_URL and DATABASE_URL.startswith("postgresql://"):
+    if DATABASE_URL:
         DATABASES = {
             "default": dj_database_url.config(
-                default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+                default=DATABASE_URL,
                 conn_max_age=600,
                 ssl_require=True,
             )
         }
     else:
+        # fallback a SQLite si no hay URL
         DATABASES = {
             "default": {
                 "ENGINE": "django.db.backends.sqlite3",
@@ -91,7 +93,7 @@ else:
             }
         }
 
-# --- Validadores de contraseña (opcional pero recomendado) ---
+# --- Validadores de contraseña ---
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -99,27 +101,29 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# --- I18N ---
+# --- Idioma y zona horaria ---
 LANGUAGE_CODE = "es-cl"
 TIME_ZONE = "America/Santiago"
 USE_I18N = True
 USE_TZ = True
 
-# --- Static (WhiteNoise) ---
+# --- Archivos estáticos ---
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# --- Media (Spaces si hay credenciales; si no, local) ---
+# --- Archivos multimedia ---
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# --- DigitalOcean Spaces ---
 AWS_ACCESS_KEY_ID = os.getenv("DO_SPACES_KEY")
 AWS_SECRET_ACCESS_KEY = os.getenv("DO_SPACES_SECRET")
 AWS_STORAGE_BUCKET_NAME = os.getenv("DO_SPACES_BUCKET")
-AWS_S3_REGION_NAME = os.getenv("DO_SPACES_REGION")  # p.ej. sfo3
-AWS_S3_ENDPOINT_URL = os.getenv("DO_SPACES_ENDPOINT")  # https://sfo3.digitaloceanspaces.com
+AWS_S3_REGION_NAME = os.getenv("DO_SPACES_REGION")
+AWS_S3_ENDPOINT_URL = os.getenv("DO_SPACES_ENDPOINT")  # Debe ser https://sfo3.digitaloceanspaces.com
+
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_FILE_OVERWRITE = False
 
