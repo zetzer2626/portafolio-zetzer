@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.title }} - Portafolio de Analista de Datos{% endblock %}
+
+{% block content %}
+<!-- Project Header -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'project_list' %}">Proyectos</a></li>
+                <li class="breadcrumb-item active">{{ project.title }}</li>
+            </ol>
+        </nav>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <h1 class="section-title">{{ project.title }}</h1>
+                <p class="lead text-muted">{{ project.description }}</p>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    {% for category in project.categories.all %}
+                    <span class="badge badge-custom">{{ category.name }}</span>
+                    {% endfor %}
+                    <small class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>{{ project.created_at|date:"F Y" }}
+                    </small>
+                    <small class="text-muted">
+                        <i class="fas fa-eye me-1"></i>{{ project.views }} vistas
+                    </small>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                {% if user.is_superuser %}
+                <div class="d-flex gap-2 justify-content-lg-end mb-3">
+                    <a href="{% url 'project_images' project.slug %}" class="btn btn-info">
+                        <i class="fas fa-images me-1"></i>Gestionar Imágenes
+                    </a>
+                    <a href="{% url 'project_update' project.slug %}" class="btn btn-warning">
+                        <i class="fas fa-edit me-1"></i>Editar
+                    </a>
+                    <a href="{% url 'project_delete' project.slug %}" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Eliminar
+                    </a>
+                </div>
+                {% endif %}
+                <div class="d-flex gap-2 justify-content-lg-end">
+                    {% if project.github_url %}
+                    <a href="{{ project.github_url }}" class="btn btn-dark" target="_blank">
+                        <i class="fab fa-github me-1"></i>GitHub
+                    </a>
+                    {% endif %}
+                    {% if project.live_url %}
+                    <a href="{{ project.live_url }}" class="btn btn-primary" target="_blank">
+                        <i class="fas fa-external-link-alt me-1"></i>Ver Demo
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Project Content -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Project Images Carousel -->
+                {% if project.images.all or project.featured_image %}
+                <div class="mb-4">
+                    <div id="projectCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-indicators">
+                            {% if project.featured_image %}
+                            <button type="button" data-bs-target="#projectCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                            {% endif %}
+                            {% for image in project.images.all %}
+                            <button type="button" data-bs-target="#projectCarousel" data-bs-slide-to="{% if project.featured_image %}{{ forloop.counter }}{% else %}{{ forloop.counter0 }}{% endif %}" {% if not project.featured_image and forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.counter|add:1 }}"></button>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="carousel-inner">
+                            {% if project.featured_image %}
+                            <div class="carousel-item active">
+                                <img src="{{ project.featured_image.url }}" class="d-block w-100 rounded" alt="{{ project.title }}">
+                                <div class="carousel-caption d-none d-md-block">
+                                    <h5>{{ project.title }}</h5>
+                                    <p>Imagen de portada</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% for image in project.images.all %}
+                            <div class="carousel-item {% if not project.featured_image and forloop.first %}active{% endif %}">
+                                <img src="{{ image.image.url }}" class="d-block w-100 rounded" alt="{{ image.title|default:project.title }}">
+                                {% if image.title or image.description %}
+                                <div class="carousel-caption d-none d-md-block">
+                                    {% if image.title %}<h5>{{ image.title }}</h5>{% endif %}
+                                    {% if image.description %}<p>{{ image.description }}</p>{% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        {% if project.images.count > 0 or project.featured_image %}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#projectCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#projectCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Project Content -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title">Descripción del Proyecto</h3>
+                        <div class="project-content">
+                            {{ project.content|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Technologies Used -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <i class="fas fa-code me-2"></i>Tecnologías Utilizadas
+                        </h4>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for tech in project.technologies.all %}
+                            <span class="badge bg-primary">{{ tech.name }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project Files -->
+                {% if project.files.all %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <i class="fas fa-file-alt me-2"></i>Archivos del Proyecto
+                        </h4>
+                        <div class="row">
+                            {% for file in project.files.all %}
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-center p-3 border rounded">
+                                    <i class="fas fa-file me-3 fa-2x text-primary"></i>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">{{ file.name }}</h6>
+                                        {% if file.description %}
+                                        <small class="text-muted">{{ file.description }}</small>
+                                        {% endif %}
+                                    </div>
+                                    <a href="{{ file.file.url }}" class="btn btn-sm btn-outline-primary" download>
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Comments Section -->
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <i class="fas fa-comments me-2"></i>Comentarios
+                        </h4>
+                        
+                        {% if user.is_authenticated %}
+                        <form method="post" action="{% url 'add_comment' project.id %}" class="mb-4">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                {{ comment_form.content }}
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>Comentar
+                            </button>
+                        </form>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <a href="{% url 'login' %}">Inicia sesión</a> para dejar un comentario.
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Comments List -->
+                        <div class="comments-list">
+                            {% for comment in comments %}
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ comment.user.username }}</h6>
+                                        <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+                                    </div>
+                                </div>
+                                <p class="mb-0 mt-2">{{ comment.content }}</p>
+                            </div>
+                            {% empty %}
+                            <p class="text-muted text-center py-3">No hay comentarios aún. ¡Sé el primero en comentar!</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Project Stats -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Estadísticas del Proyecto</h5>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-end">
+                                    <h4 class="text-primary mb-1">{{ project.get_likes_count }}</h4>
+                                    <small class="text-muted">Me gusta</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-secondary mb-1">{{ project.get_dislikes_count }}</h4>
+                                <small class="text-muted">No me gusta</small>
+                            </div>
+                        </div>
+                        
+                        {% if user.is_authenticated %}
+                        <hr>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary flex-fill" onclick="voteProject({{ project.id }}, 'like')">
+                                <i class="fas fa-thumbs-up me-1"></i>Me gusta
+                            </button>
+                            <button class="btn btn-outline-secondary flex-fill" onclick="voteProject({{ project.id }}, 'dislike')">
+                                <i class="fas fa-thumbs-down me-1"></i>No me gusta
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Project Info -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Información del Proyecto</h5>
+                        <ul class="list-unstyled">
+                                                         <li class="mb-2">
+                                 <i class="fas fa-folder me-2 text-primary"></i>
+                                 <strong>Categorías:</strong> 
+                                 {% for category in project.categories.all %}
+                                     <span class="badge bg-secondary">{{ category.name }}</span>
+                                 {% endfor %}
+                             </li>
+                            <li class="mb-2">
+                                <i class="fas fa-calendar me-2 text-primary"></i>
+                                <strong>Fecha:</strong> {{ project.created_at|date:"F Y" }}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-eye me-2 text-primary"></i>
+                                <strong>Vistas:</strong> {{ project.views }}
+                            </li>
+                            {% if project.is_featured %}
+                            <li class="mb-2">
+                                <i class="fas fa-star me-2 text-warning"></i>
+                                <strong>Proyecto Destacado</strong>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Related Projects -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Proyectos Relacionados</h5>
+                        <div class="list-group list-group-flush">
+                                                         {% for related_project in project.categories.first.projects.all|slice:":3" %}
+                                 {% if related_project != project %}
+                                <a href="{{ related_project.get_absolute_url }}" class="list-group-item list-group-item-action">
+                                    <h6 class="mb-1">{{ related_project.title }}</h6>
+                                    <small class="text-muted">{{ related_project.description|truncatewords:10 }}</small>
+                                </a>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function voteProject(projectId, voteType) {
+    fetch(`/projects/${projectId}/vote/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: `vote_type=${voteType}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.error('Error:', data.error);
+        } else {
+            // Actualizar contadores en la UI
+            const likeCount = document.querySelector('.text-primary');
+            const dislikeCount = document.querySelector('.text-secondary');
+            
+            if (likeCount) likeCount.textContent = data.likes;
+            if (dislikeCount) dislikeCount.textContent = data.dislikes;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+</script>
+{% endblock %} 

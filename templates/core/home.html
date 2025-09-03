@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio - Portafolio de Analista de Datos{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-4">
+                    Analista de Datos Profesional
+                </h1>
+                <p class="lead mb-4">
+                    Transformando datos en insights valiosos para la toma de decisiones empresariales. 
+                    Especializado en Business Intelligence, Machine Learning y análisis predictivo.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'project_list' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-project-diagram me-2"></i>Ver Proyectos
+                    </a>
+                    <a href="{% url 'about' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-user me-2"></i>Sobre Mí
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <i class="fas fa-chart-line fa-8x text-light opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="card border-0 bg-white">
+                    <div class="card-body">
+                        <i class="fas fa-project-diagram fa-3x text-primary mb-3"></i>
+                        <h3 class="fw-bold">{{ total_projects }}</h3>
+                        <p class="text-muted mb-0">Proyectos Completados</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card border-0 bg-white">
+                    <div class="card-body">
+                        <i class="fas fa-code fa-3x text-primary mb-3"></i>
+                        <h3 class="fw-bold">15+</h3>
+                        <p class="text-muted mb-0">Tecnologías Dominadas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card border-0 bg-white">
+                    <div class="card-body">
+                        <i class="fas fa-award fa-3x text-primary mb-3"></i>
+                        <h3 class="fw-bold">8+</h3>
+                        <p class="text-muted mb-0">Años de Experiencia</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Projects -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-lg-8">
+                <h2 class="section-title">Proyectos Destacados</h2>
+                <p class="text-muted">Algunos de mis mejores trabajos en análisis de datos y machine learning.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="{% url 'project_list' %}" class="btn btn-primary">
+                    Ver Todos los Proyectos
+                </a>
+            </div>
+        </div>
+        
+        <div class="row">
+            {% for project in featured_projects %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    {% if project.featured_image %}
+                        <img src="{{ project.featured_image.url }}" class="card-img-top" alt="{{ project.title }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="fas fa-chart-bar fa-3x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge badge-custom">{{ project.category.name }}</span>
+                            <small class="text-muted">{{ project.created_at|date:"M Y" }}</small>
+                        </div>
+                        <h5 class="card-title">{{ project.title }}</h5>
+                        <p class="card-text text-muted">{{ project.description|truncatewords:20 }}</p>
+                        <div class="mb-3">
+                            {% for tech in project.technologies.all|slice:":3" %}
+                                <span class="badge bg-light text-dark me-1">{{ tech.name }}</span>
+                            {% endfor %}
+                            {% if project.technologies.count > 3 %}
+                                <span class="badge bg-light text-dark">+{{ project.technologies.count|add:"-3" }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <button class="btn btn-sm btn-outline-primary me-2" onclick="voteProject({{ project.id }}, 'like')">
+                                    <i class="fas fa-thumbs-up"></i> {{ project.get_likes_count }}
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="voteProject({{ project.id }}, 'dislike')">
+                                    <i class="fas fa-thumbs-down"></i> {{ project.get_dislikes_count }}
+                                </button>
+                            </div>
+                            <a href="{{ project.get_absolute_url }}" class="btn btn-primary btn-sm">
+                                Ver Detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No hay proyectos destacados aún</h4>
+                <p class="text-muted">Los proyectos destacados aparecerán aquí.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">Categorías de Proyectos</h2>
+        <div class="row">
+            {% for category in categories %}
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-pie fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">{{ category.name }}</h5>
+                        <p class="card-text text-muted">{{ category.description|default:"Proyectos en esta categoría" }}</p>
+                        <a href="{% url 'category_projects' category.slug %}" class="btn btn-outline-primary">
+                            Ver Proyectos
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function voteProject(projectId, voteType) {
+    fetch(`/projects/${projectId}/vote/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: `vote_type=${voteType}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.error('Error:', data.error);
+        } else {
+            // Actualizar contadores en la UI
+            const projectCard = document.querySelector(`[data-project-id="${projectId}"]`);
+            if (projectCard) {
+                const likeBtn = projectCard.querySelector('.btn-outline-primary');
+                const dislikeBtn = projectCard.querySelector('.btn-outline-secondary');
+                
+                likeBtn.innerHTML = `<i class="fas fa-thumbs-up"></i> ${data.likes}`;
+                dislikeBtn.innerHTML = `<i class="fas fa-thumbs-down"></i> ${data.dislikes}`;
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+</script>
+{% endblock %} 

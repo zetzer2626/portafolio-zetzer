@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block title %}Sobre Mí - Portafolio de Analista de Datos{% endblock %}
+
+{% block content %}
+<!-- Profile Section -->
+{% if profile %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-4 text-center mb-4 mb-lg-0">
+                {% if profile.profile_image %}
+                    <img src="{{ profile.profile_image.url }}" class="rounded-circle img-fluid" alt="Profile" style="width: 250px; height: 250px; object-fit: cover;">
+                {% else %}
+                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center mx-auto" style="width: 250px; height: 250px;">
+                        <i class="fas fa-user fa-6x text-white"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-lg-8">
+                <h1 class="section-title">Analista de Datos Profesional</h1>
+                {% if profile.bio %}
+                    <p class="lead mb-4">{{ profile.bio }}</p>
+                {% else %}
+                    <p class="lead mb-4">Apasionado por transformar datos en insights valiosos para la toma de decisiones empresariales. Especializado en Business Intelligence, Machine Learning y análisis predictivo.</p>
+                {% endif %}
+                
+                <div class="row mb-4">
+                    {% if profile.location %}
+                    <div class="col-md-6 mb-2">
+                        <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                        <strong>Ubicación:</strong> {{ profile.location }}
+                    </div>
+                    {% endif %}
+                    {% if profile.phone %}
+                    <div class="col-md-6 mb-2">
+                        <i class="fas fa-phone text-primary me-2"></i>
+                        <strong>Teléfono:</strong> {{ profile.phone }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="d-flex gap-3">
+                    {% if profile.linkedin_url %}
+                    <a href="{{ profile.linkedin_url }}" class="btn btn-outline-primary" target="_blank">
+                        <i class="fab fa-linkedin me-2"></i>LinkedIn
+                    </a>
+                    {% endif %}
+                    {% if profile.github_url %}
+                    <a href="{{ profile.github_url }}" class="btn btn-outline-dark" target="_blank">
+                        <i class="fab fa-github me-2"></i>GitHub
+                    </a>
+                    {% endif %}
+                    {% if profile.website %}
+                    <a href="{{ profile.website }}" class="btn btn-outline-secondary" target="_blank">
+                        <i class="fas fa-globe me-2"></i>Sitio Web
+                    </a>
+                    {% endif %}
+                </div>
+                
+                {% if user.is_superuser %}
+                <div class="mt-3">
+                    <a href="{% url 'profile_update' %}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit me-1"></i>Editar Perfil
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Skills Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">Habilidades y Tecnologías</h2>
+        <div class="row">
+            {% for skill in skills %}
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        {% if skill.icon %}
+                            <i class="{{ skill.icon }} fa-3x text-primary mb-3"></i>
+                        {% else %}
+                            <i class="fas fa-code fa-3x text-primary mb-3"></i>
+                        {% endif %}
+                        <h5 class="card-title">{{ skill.name }}</h5>
+                        <div class="progress mb-2">
+                            <div class="progress-bar" role="progressbar" style="width: {% widthratio skill.proficiency_level 5 100 %}%" 
+                                 aria-valuenow="{% widthratio skill.proficiency_level 5 100 %}" aria-valuemin="0" aria-valuemax="100">
+                                {{ skill.proficiency_level }}/5
+                            </div>
+                        </div>
+                        <small class="text-muted">{{ skill.get_category_display }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Experience Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <h2 class="section-title">Experiencia Laboral</h2>
+                <div class="timeline">
+                    {% for experience in experiences %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">{{ experience.title }}</h5>
+                                    <h6 class="text-primary mb-1">{{ experience.company }}</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ experience.start_date|date:"M Y" }} - 
+                                        {% if experience.current %}
+                                            Presente
+                                        {% else %}
+                                            {{ experience.end_date|date:"M Y" }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <span class="badge badge-custom">{{ experience.get_experience_type_display }}</span>
+                            </div>
+                            <p class="card-text">{{ experience.description }}</p>
+                            {% if experience.technologies_used %}
+                            <div class="mb-3">
+                                <strong>Tecnologías:</strong>
+                                <span class="text-muted">{{ experience.technologies_used }}</span>
+                            </div>
+                            {% endif %}
+                            {% if experience.achievements %}
+                            <div class="mb-3">
+                                <strong>Logros:</strong>
+                                <p class="text-muted mb-0">{{ experience.achievements }}</p>
+                            </div>
+                            {% endif %}
+                            {% if experience.location %}
+                            <small class="text-muted">
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ experience.location }}
+                            </small>
+                            {% endif %}
+                        </div>
+                        {% if user.is_superuser %}
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="{% url 'experience_update' experience.pk %}" class="btn btn-sm btn-outline-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'experience_delete' experience.pk %}" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No hay experiencia laboral registrada</h4>
+                        <p class="text-muted">La experiencia laboral aparecerá aquí.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if user.is_superuser %}
+                <div class="text-center mt-4">
+                    <a href="{% url 'experience_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Agregar Experiencia
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Certifications Sidebar -->
+            <div class="col-lg-4">
+                <h3 class="section-title">Certificaciones</h3>
+                {% for certification in certifications %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start">
+                            {% if certification.image %}
+                                <img src="{{ certification.image.url }}" class="me-3" alt="{{ certification.name }}" style="width: 60px; height: 60px; object-fit: cover;">
+                            {% else %}
+                                <div class="me-3 bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-certificate fa-2x text-primary"></i>
+                                </div>
+                            {% endif %}
+                            <div class="flex-grow-1">
+                                <h6 class="card-title mb-1">{{ certification.name }}</h6>
+                                <p class="text-muted mb-1">{{ certification.issuing_organization }}</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ certification.issue_date|date:"M Y" }}
+                                    {% if certification.expiry_date %}
+                                        - {{ certification.expiry_date|date:"M Y" }}
+                                    {% endif %}
+                                </small>
+                                {% if certification.credential_url %}
+                                <div class="mt-2">
+                                    <a href="{{ certification.credential_url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                        <i class="fas fa-external-link-alt me-1"></i>Verificar
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if user.is_superuser %}
+                        <div class="mt-3 d-flex justify-content-end gap-2">
+                            <a href="{% url 'certification_update' certification.pk %}" class="btn btn-sm btn-outline-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'certification_delete' certification.pk %}" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-4">
+                    <i class="fas fa-certificate fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No hay certificaciones</h5>
+                    <p class="text-muted">Las certificaciones aparecerán aquí.</p>
+                </div>
+                {% endfor %}
+                
+                {% if user.is_superuser %}
+                <div class="text-center">
+                    <a href="{% url 'certification_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Agregar Certificación
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 
