@@ -90,13 +90,17 @@ class Certification(models.Model):
     description = models.TextField(blank=True)
     document = models.FileField(
         upload_to='certifications/',
-        validators=[FileExtensionValidator(['pdf'])],
-        blank=True, null=True
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'jpeg', 'png'])]
     )
-
+    
     class Meta:
         ordering = ['-issue_date']
-
+    
     def __str__(self):
         return f"{self.name} - {self.issuing_organization}"
+
+
+
 

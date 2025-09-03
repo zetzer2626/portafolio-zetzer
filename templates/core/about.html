@@ -184,10 +184,8 @@
                 <div class="card mb-3">
                     <div class="card-body">
                         <div class="d-flex align-items-start">
-                            {% if certification.document %}
-                                <div class="me-3 bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                    <i class="fas fa-file-pdf fa-2x text-danger"></i>
-                                </div>
+                            {% if certification.image %}
+                                <img src="{{ certification.image.url }}" class="me-3" alt="{{ certification.name }}" style="width: 60px; height: 60px; object-fit: cover;">
                             {% else %}
                                 <div class="me-3 bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
                                     <i class="fas fa-certificate fa-2x text-primary"></i>
@@ -203,18 +201,13 @@
                                         - {{ certification.expiry_date|date:"M Y" }}
                                     {% endif %}
                                 </small>
+                                {% if certification.credential_url %}
                                 <div class="mt-2">
-                                    {% if certification.document %}
-                                    <a href="{{ certification.document.url }}" class="btn btn-sm btn-outline-danger me-2" target="_blank">
-                                        <i class="fas fa-download me-1"></i>Descargar PDF
-                                    </a>
-                                    {% endif %}
-                                    {% if certification.credential_url %}
                                     <a href="{{ certification.credential_url }}" class="btn btn-sm btn-outline-primary" target="_blank">
                                         <i class="fas fa-external-link-alt me-1"></i>Verificar
                                     </a>
-                                    {% endif %}
                                 </div>
+                                {% endif %}
                             </div>
                         </div>
                         {% if user.is_superuser %}

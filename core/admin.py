@@ -42,7 +42,7 @@ class CertificationAdmin(admin.ModelAdmin):
             'fields': ('issue_date', 'expiry_date')
         }),
         ('Detalles', {
-            'fields': ('credential_id', 'credential_url', 'description', 'image')
+            'fields': ('credential_id', 'credential_url', 'description', 'document')
         }),
     )
 

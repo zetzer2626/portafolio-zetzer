@@ -1,7 +1,6 @@
 from django import forms
 from .models import Profile, Experience, Certification
 
-
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
@@ -101,14 +100,8 @@ class CertificationForm(forms.ModelForm):
     class Meta:
         model = Certification
         fields = [
-            'name',
-            'issuing_organization',
-            'issue_date',
-            'expiry_date',
-            'credential_id',
-            'credential_url',
-            'description',
-            'document'
+            'name', 'issuing_organization', 'issue_date', 'expiry_date',
+            'credential_id', 'credential_url', 'description', 'document'
         ]
         widgets = {
             'name': forms.TextInput(attrs={
@@ -117,7 +110,7 @@ class CertificationForm(forms.ModelForm):
             }),
             'issuing_organization': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Organización emisora'
+                'placeholder': 'Organización que emite la certificación'
             }),
             'issue_date': forms.DateInput(attrs={
                 'class': 'form-control',
@@ -129,30 +122,15 @@ class CertificationForm(forms.ModelForm):
             }),
             'credential_id': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'ID de credencial (opcional)'
+                'placeholder': 'ID de la credencial (opcional)'
             }),
             'credential_url': forms.URLInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'URL de verificación'
+                'placeholder': 'URL para verificar la certificación'
             }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
-                'placeholder': 'Descripción breve...'
+                'placeholder': 'Descripción de la certificación...'
             }),
-            'document': forms.FileInput(attrs={
-                'class': 'form-control',
-                'accept': 'application/pdf'
-            }),
-        }
-
-    # Validación extra: solo PDF y tamaño máximo de 5MB
-    def clean_document(self):
-        file = self.cleaned_data.get('document')
-        if not file:
-            return file
-        if getattr(file, 'content_type', '') != 'application/pdf':
-            raise forms.ValidationError('Solo se permiten archivos PDF.')
-        if file.size > 5 * 1024 * 1024:  # 5MB
-            raise forms.ValidationError('El PDF no puede superar los 5 MB.')
-        return file
+        } 
