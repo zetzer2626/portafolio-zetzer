@@ -1,6 +1,7 @@
 from django import forms
 from .models import Profile, Experience, Certification
 
+
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
@@ -100,37 +101,27 @@ class CertificationForm(forms.ModelForm):
     class Meta:
         model = Certification
         fields = [
-            'name', 'issuing_organization', 'issue_date', 'expiry_date',
-            'credential_id', 'credential_url', 'description', 'image'
+            'name','issuing_organization','issue_date','expiry_date',
+            'credential_id','credential_url','description','document'
         ]
         widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Nombre de la certificación'
-            }),
-            'issuing_organization': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Organización que emite la certificación'
-            }),
-            'issue_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
-            }),
-            'expiry_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
-            }),
-            'credential_id': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'ID de la credencial (opcional)'
-            }),
-            'credential_url': forms.URLInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'URL para verificar la certificación'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Descripción de la certificación...'
-            }),
-        } 
+            'name': forms.TextInput(attrs={'class': 'form-control','placeholder': 'Nombre de la certificación'}),
+            'issuing_organization': forms.TextInput(attrs={'class': 'form-control','placeholder': 'Organización emisora'}),
+            'issue_date': forms.DateInput(attrs={'class': 'form-control','type': 'date'}),
+            'expiry_date': forms.DateInput(attrs={'class': 'form-control','type': 'date'}),
+            'credential_id': forms.TextInput(attrs={'class': 'form-control','placeholder': 'ID de credencial (opcional)'}),
+            'credential_url': forms.URLInput(attrs={'class': 'form-control','placeholder': 'URL de verificación'}),
+            'description': forms.Textarea(attrs={'class': 'form-control','rows': 3,'placeholder': 'Descripción breve...'}),
+            'document': forms.FileInput(attrs={'class': 'form-control','accept': 'application/pdf'}),
+        }
+
+    # Validación extra (tipo y peso máx. 5MB)
+    def clean_document(self):
+        f = self.cleaned_data.get('document')
+        if not f:
+            return f
+        if getattr(f, 'content_type', '') != 'application/pdf':
+            raise forms.ValidationError('Solo se permiten archivos PDF.')
+        if f.size > 5 * 1024 * 1024:
+            raise forms.ValidationError('El PDF no puede superar 5 MB.')
+        return f

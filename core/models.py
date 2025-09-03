@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
+from django.core.validators import FileExtensionValidator
+
 
 class Skill(models.Model):
     SKILL_CATEGORIES = [
@@ -86,10 +88,15 @@ class Certification(models.Model):
     credential_id = models.CharField(max_length=100, blank=True)
     credential_url = models.URLField(blank=True)
     description = models.TextField(blank=True)
-    image = models.ImageField(upload_to='certifications/', blank=True, null=True)
-    
+    document = models.FileField(
+        upload_to='certifications/',
+        validators=[FileExtensionValidator(['pdf'])],
+        blank=True, null=True
+    )
+
     class Meta:
         ordering = ['-issue_date']
-    
+
     def __str__(self):
         return f"{self.name} - {self.issuing_organization}"
+
