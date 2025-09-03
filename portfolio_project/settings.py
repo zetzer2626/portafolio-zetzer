@@ -122,14 +122,15 @@ AWS_ACCESS_KEY_ID = os.getenv("DO_SPACES_KEY")
 AWS_SECRET_ACCESS_KEY = os.getenv("DO_SPACES_SECRET")
 AWS_STORAGE_BUCKET_NAME = os.getenv("DO_SPACES_BUCKET")
 AWS_S3_REGION_NAME = os.getenv("DO_SPACES_REGION")
-AWS_S3_ENDPOINT_URL = os.getenv("DO_SPACES_ENDPOINT")  # Debe ser https://sfo3.digitaloceanspaces.com
+AWS_S3_ENDPOINT_URL = os.getenv("DO_SPACES_ENDPOINT")
 
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_FILE_OVERWRITE = False
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_REGION_NAME}.digitaloceanspaces.com"
 
 if all([AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME, AWS_S3_REGION_NAME]):
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_REGION_NAME}.digitaloceanspaces.com/"
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
 
 # --- HTTPS detrás de proxy (Railway) ---
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
