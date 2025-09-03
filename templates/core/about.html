@@ -128,10 +128,12 @@
                                 <span class="badge badge-custom">{{ experience.get_experience_type_display }}</span>
                             </div>
                             <p class="card-text">{{ experience.description }}</p>
-                            {% if experience.technologies_used %}
+                            {% if experience.technologies_used.all %}
                             <div class="mb-3">
                                 <strong>Tecnologías:</strong>
-                                <span class="text-muted">{{ experience.technologies_used }}</span>
+                                {% for tech in experience.technologies_used.all %}
+                                    <span class="badge bg-secondary">{{ tech.name }}</span>
+                                {% endfor %}
                             </div>
                             {% endif %}
                             {% if experience.achievements %}
@@ -184,8 +186,12 @@
                 <div class="card mb-3">
                     <div class="card-body">
                         <div class="d-flex align-items-start">
-                            {% if certification.image %}
-                                <img src="{{ certification.image.url }}" class="me-3" alt="{{ certification.name }}" style="width: 60px; height: 60px; object-fit: cover;">
+                            {% if certification.document %}
+                                <div class="me-3">
+                                    <a href="{{ certification.document.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-file me-1"></i> Ver archivo
+                                    </a>
+                                </div>
                             {% else %}
                                 <div class="me-3 bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
                                     <i class="fas fa-certificate fa-2x text-primary"></i>
@@ -241,4 +247,4 @@
         </div>
     </div>
 </section>
-{% endblock %} 
+{% endblock %}

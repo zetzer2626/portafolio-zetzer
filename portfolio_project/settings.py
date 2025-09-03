@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- Seguridad / entorno ---
 SECRET_KEY = 'django-insecure-*q(juvh&o%giq7*4rns!+hCopy-Item)n_i-^3yg-5ej7_&1s2rlz4m'
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",") if not DEBUG else ["*"]
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
